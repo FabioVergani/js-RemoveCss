@@ -1,0 +1,72 @@
+(function(w){
+ const $=w,$d=$.document,addListener=$.addEventListener,remListener=$.removeEventListener,on=function(a,b){remListener(a,b);addListener(a,b)},at=function(a,b){on(a,function f(x){b(x);remListener(a,f)})},run=function(a){$d.readyState!=='complete' ? at('load',a):a({target:$d})};
+ run(function(evt){
+  const $d=evt.target,$=$d.defaultView,$dE=$d.documentElement;
+  if($dE!==null){
+   const $trace=$.console,css=[],blankLines=/^\s*[\r\n]/gm;
+   let e=$d.createDocumentFragment().appendChild($dE.cloneNode(true)),walker=$d.createNodeIterator(e,-1,null);
+   $trace.group('logs');
+   while(e){
+    let i=e.nodeType,k=false;
+    if(i!==8){
+     if(i!==3){
+      if(i!==1){
+       k=e;//$trace.info(i,e);
+      }else{
+       const s=e.tagName.toLowerCase();
+       if(s!=='style'){
+        if(s!=='link'){
+         if(s!=='script'){
+		  if(e.style.display!=='none'){
+			const m=e.attributes;
+			let i=m.length;
+			if(i>0){
+			 const o=new Set();
+			 if(e.hasAttribute('style')){
+			  const a=e.getAttributeNode('style');
+			  let s=a.value;
+			  if(o.hasInlineStyle=(blankLines.test(s)!==true)){
+				a.value=s.trim();  
+				a.ownerNode=e;
+				css.push(a);
+				o.add(a)
+			  };
+			  e.removeAttribute('style')
+			 };
+			 while(--i>=1){
+				  console.log(m[i])
+			  //e.removeAttribute(m[i--].name)
+			 };
+			 e.originalAttributes=o;
+
+		   }
+		  }else{
+		   k=e
+		  }		  
+         }else{
+          k=e
+         }
+        }else{
+         if(e.getAttribute('rel')!== 'stylesheet'){
+          //remattrs
+         }else{
+          css.push(k=e)
+         }
+        }
+       }else{
+        css.push(k=e)
+       }
+      }
+     }
+    }else{
+     k=e
+    };
+    if(k!==false){e.remove()};e=walker.nextNode()
+   };
+   $dE.replaceWith(walker.root);
+   //   
+   $trace.log('cascade:%O',css);
+   $trace.groupEnd();
+  }
+ })
+})(window);
