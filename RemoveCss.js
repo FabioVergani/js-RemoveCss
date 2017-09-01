@@ -7,64 +7,50 @@
    let e=$dE2;
    trace.group('logs');
    while(e){
-    let i=e.nodeType,k=false;
+    let i=e.nodeType;
     if(i!==8){
      if(i!==3){
       if(i!==1){
-       k=e;//trace.info(i,e);
+       trace.info(i,e);
       }else{
-       const s=e.tagName.toLowerCase();
-       if(s!=='style'){
-        if(s!=='link'){
-         if(s!=='script'){
-		  if(e.style.display!=='none'){
-			const m=e.attributes;
-			if(m.length>0){
-			 const o=new Set();
-			 if(e.hasAttribute('style')){
-			  const a=e.getAttributeNode('style');
-			  let s=a.value;
-			  if(blankLinePattern.test(s)!==true){
-				a.value=s.trim();  
-				a.ownerNode=e;
-				css.push(a);
-				o.add(a)
-			  };
-			  e.removeAttribute('style')
-			 };
-			 //
-			 while(m.length>0){
-			  let s=m[0].name;
-			  o.add(e.getAttributeNode(s));
-			  e.removeAttribute(s);
-			 };
-
-			 
-			 
-			 e.originalAttributes=o;console.dir(o);
-		   }
-		  }else{
-		   k=e
-		  }		  
-         }else{
-          k=e
-         }
-        }else{
-         if(e.getAttribute('rel')!== 'stylesheet'){
-          //remattrs
-         }else{
-          css.push(k=e)
-         }
-        }
+       const s=e.tagName.toLowerCase(), notLink=s!=='link', notStyle=s!=='style', notFont=s!=='font', notBasefont=s!=='basefont';
+       if(notLink||notStyle||notFont||notBasefont){
+		if(s!=='script'||e.style.display!=='none' && (e.offsetWidth||e.offsetHeight||e.getClientRects().length)){
+		 const m=e.attributes;
+		 if(m.length>0){
+		  const o=new Set();
+		  if(e.hasAttribute('style')){
+		    const a=e.getAttributeNode('style');
+		    let s=a.value;
+		    if(blankLinePattern.test(s)!==true){
+		 	a.value=s.trim();  
+		 	a.ownerNode=e;
+		 	css.push(a);
+		 	o.add(a)
+		    };
+		    e.removeAttribute('style')
+		  };
+		  //
+		  while(m.length>0){
+		    let s=m[0].name;
+		    o.add(e.getAttributeNode(s));
+		    e.removeAttribute(s);
+		  };
+		  e.originalAttributes=o;console.dir(o);
+		 };
+         e=null;			
+		} 
        }else{
-        css.push(k=e)
+	    if(notFont && notBasefont && notStyle?(e.href!==e.baseURI)&&e.relList.contains('stylesheet'):e.sheet.cssRules.length){
+          css.push(e)
+		}
        }
       }
-     }
-    }else{
-     k=e
+     }else{
+	  e=null;
+	 }
     };
-    if(k!==false){e.remove()};e=walker.nextNode()
+    if(e!==null){e.remove()};e=walker.nextNode()
    };
    $dE.replaceWith($dE2);
    //   
